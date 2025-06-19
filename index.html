@@ -9,10 +9,45 @@
       font-family: sans-serif;
       text-align: center;
       margin-top: 100px;
+      background-color: #f4f4f4;
+    }
+
+    .checkmark-wrapper {
+      display: inline-block;
+      width: 100px;
+      height: 100px;
+      margin-bottom: 20px;
+    }
+
+    svg {
+      width: 100px;
+      height: 100px;
+    }
+
+    .checkmark {
+      fill: none;
+      stroke: #28a745;
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      animation: draw 1s ease-out forwards;
+    }
+
+    @keyframes draw {
+      to {
+        stroke-dashoffset: 0;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="checkmark-wrapper">
+    <svg viewBox="0 0 52 52">
+      <path class="checkmark" d="M14 27 L22 35 L38 17" />
+    </svg>
+  </div>
   <h1>Email Verified!</h1>
   <p>You can now return to the app and log in with your credentials.</p>
 </body>
