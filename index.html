@@ -3,27 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Email Verified</title>
+  <title>Email Verified - Compox</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       text-align: center;
-      margin-top: 100px;
-      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
     }
-
+    .container {
+      margin-top: 80px;
+    }
     .checkmark-wrapper {
       display: inline-block;
       width: 100px;
       height: 100px;
       margin-bottom: 20px;
     }
-
     svg {
       width: 100px;
       height: 100px;
     }
-
     .checkmark {
       fill: none;
       stroke: #28a745;
@@ -34,21 +36,86 @@
       stroke-dashoffset: 100;
       animation: draw 3s ease-out forwards;
     }
-
     @keyframes draw {
       to {
         stroke-dashoffset: 0;
       }
     }
+    .message {
+      font-size: 18px;
+      margin-top: 15px;
+    }
+    .download-btn {
+      display: inline-block;
+      margin-top: 25px;
+      padding: 12px 20px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .download-btn:hover {
+      background-color: #218838;
+    }
   </style>
 </head>
 <body>
-  <div class="checkmark-wrapper">
-    <svg viewBox="0 0 52 52">
-      <path class="checkmark" d="M14 27 L22 35 L38 17" />
-    </svg>
+  <div class="container">
+    <div class="checkmark-wrapper">
+      <svg viewBox="0 0 52 52">
+        <path class="checkmark" d="M14 27 L22 35 L38 17" />
+      </svg>
+    </div>
+    <h1>Email Verified!</h1>
+    <p class="message" id="statusMessage">Preparing to open Compox...</p>
+    <a id="downloadLink" class="download-btn" href="#" style="display:none;">
+      Download Compox
+    </a>
   </div>
-  <h1>Email Verified!</h1>
-  <p>You can now return to the app and log in with your credentials.</p>
+
+  <script>
+    const ANDROID_STORE_URL = "https://play.google.com/store/apps/details?id=com.yourcompany.compox";
+    const IOS_STORE_URL = "https://apps.apple.com/app/idYOUR_APP_ID";
+    const DEEP_LINK = "compox://login"; // Your app deep link
+
+    // Wait for animation before attempting
+    setTimeout(() => {
+      let start = Date.now();
+      let hiddenCheck;
+
+      function visibilityChange() {
+        if (document.hidden) {
+          hiddenCheck = true;
+        }
+      }
+      document.addEventListener("visibilitychange", visibilityChange);
+
+      // Try opening the app
+      window.location.href = DEEP_LINK;
+
+      // After 1.5 seconds, check if app opened
+      setTimeout(() => {
+        document.removeEventListener("visibilitychange", visibilityChange);
+
+        if (hiddenCheck) {
+          document.getElementById("statusMessage").innerText = "Opening Compox...";
+        } else {
+          document.getElementById("statusMessage").innerText = "Compox is not installed.";
+          const downloadLink = document.getElementById("downloadLink");
+          downloadLink.style.display = "inline-block";
+          // Detect platform and set store link
+          if (/android/i.test(navigator.userAgent)) {
+            downloadLink.href = ANDROID_STORE_URL;
+          } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            downloadLink.href = IOS_STORE_URL;
+          } else {
+            downloadLink.href = "https://compox.com"; // Fallback for desktop
+          }
+        }
+      }, 1500);
+    }, 3200);
+  </script>
 </body>
 </html>
