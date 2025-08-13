@@ -75,47 +75,60 @@
     </a>
   </div>
 
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
+    const SUPABASE_URL = "https://xsoanrrdybimemacaror.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhzb2FucnJkeWJpbWVtYWNhcm9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzNDg0OTQsImV4cCI6MjA2MTkyNDQ5NH0.GbdguCKb_UdXbtG4cAYqOCZV-ejjdL7YdRE7NHrb0vM"; // Keep your key
+    const DEEP_LINK = "compox://login-callback"; 
     const ANDROID_STORE_URL = "https://play.google.com/store/apps/details?id=com.yourcompany.compox";
     const IOS_STORE_URL = "https://apps.apple.com/app/idYOUR_APP_ID";
-    const DEEP_LINK = "compox://login-callback"; // Your app deep link
 
-    // Wait for animation before attempting
-    setTimeout(() => {
-      let start = Date.now();
-      let hiddenCheck;
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      function visibilityChange() {
-        if (document.hidden) {
-          hiddenCheck = true;
-        }
-      }
-      document.addEventListener("visibilitychange", visibilityChange);
+    // Parse query parameters
+    const params = new URLSearchParams(window.location.search);
+    const access_token = params.get("access_token");
+    const refresh_token = params.get("refresh_token");
 
-      // Try opening the app
-      window.location.href = DEEP_LINK;
-
-      // After 1.5 seconds, check if app opened
-      setTimeout(() => {
-        document.removeEventListener("visibilitychange", visibilityChange);
-
-        if (hiddenCheck) {
-          document.getElementById("statusMessage").innerText = "Opening Compox...";
-        } else {
-          document.getElementById("statusMessage").innerText = "Compox is not installed.";
-          const downloadLink = document.getElementById("downloadLink");
-          downloadLink.style.display = "inline-block";
-          // Detect platform and set store link
-          if (/android/i.test(navigator.userAgent)) {
-            downloadLink.href = ANDROID_STORE_URL;
-          } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-            downloadLink.href = IOS_STORE_URL;
+    if (!access_token) {
+      document.getElementById("statusMessage").innerText = "Invalid or expired link.";
+    } else {
+      supabaseClient.auth.setSession({ access_token, refresh_token: refresh_token || "" })
+        .then(({ error }) => {
+          if (error) {
+            document.getElementById("statusMessage").innerText = error.message;
           } else {
-            downloadLink.href = "https://compox.com"; // Fallback for desktop
+            // Email verified successfully, try opening app
+            setTimeout(() => {
+              let hiddenCheck;
+              function visibilityChange() {
+                if (document.hidden) hiddenCheck = true;
+              }
+              document.addEventListener("visibilitychange", visibilityChange);
+              window.location.href = DEEP_LINK;
+
+              setTimeout(() => {
+                document.removeEventListener("visibilitychange", visibilityChange);
+                if (hiddenCheck) {
+                  document.getElementById("statusMessage").innerText = "Opening Compox...";
+                } else {
+                  document.getElementById("statusMessage").innerText = "Compox is not installed.";
+                  const downloadLink = document.getElementById("downloadLink");
+                  downloadLink.style.display = "inline-block";
+                  if (/android/i.test(navigator.userAgent)) {
+                    downloadLink.href = ANDROID_STORE_URL;
+                  } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                    downloadLink.href = IOS_STORE_URL;
+                  } else {
+                    downloadLink.href = "https://compox.com";
+                  }
+                }
+              }, 1500);
+            }, 3200);
           }
-        }
-      }, 1500);
-    }, 3200);
+        });
+    }
   </script>
 </body>
 </html>
